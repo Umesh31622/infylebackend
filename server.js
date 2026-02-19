@@ -51,18 +51,13 @@ const allowedOrigins = [
   "https://admintest.infyle.in",
 ];
 
-// ✅ CORS Middleware
+// ✅ CORS Middleware (No app.options needed)
 app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// ✅ Preflight Fix (Node 22 + Express Safe)
-app.options("/*", cors());
 
 // Middleware
 app.use(express.json());
@@ -74,12 +69,10 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 
-// Test Route
 app.get("/", (req, res) => {
   res.send("✅ Backend Working Perfectly");
 });
 
-// Start Server
 const PORT = process.env.PORT || 9007;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

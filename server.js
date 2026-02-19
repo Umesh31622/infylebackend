@@ -44,7 +44,7 @@ const testRoutes = require("./routes/testRoutes");
 
 const app = express();
 
-// ✅ Allowed Origins List
+// ✅ Allowed Origins
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
@@ -52,22 +52,26 @@ const allowedOrigins = [
   "https://admintest.infyle.in",
 ];
 
-// ✅ CORS Middleware Fix
+// ✅ CORS Fix for Render + Preflight
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like Postman)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("❌ Not allowed by CORS"));
+        callback(new Error("❌ CORS Not Allowed"));
       }
     },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
+
+// ✅ Preflight Fix (MOST IMPORTANT)
+app.options("*", cors());
 
 // Middleware
 app.use(express.json());
@@ -90,3 +94,4 @@ const PORT = process.env.PORT || 9007;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+

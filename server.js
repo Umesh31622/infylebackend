@@ -32,6 +32,7 @@
 // app.listen(PORT, () => {
 //   console.log(`🚀 Server running on port ${PORT}`);
 // });
+
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -43,7 +44,7 @@ const testRoutes = require("./routes/testRoutes");
 
 const app = express();
 
-// ✅ Allowed Origins
+// ✅ Allowed Frontend Origins
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
@@ -51,29 +52,52 @@ const allowedOrigins = [
   "https://admintest.infyle.in",
 ];
 
-// ✅ CORS Middleware (No app.options needed)
+// ✅ CORS Middleware (Render Safe)
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("❌ Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ Manual OPTIONS Fix (Render Preflight Safe)
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Middleware
 app.use(express.json());
 
-// Connect DB
+// Connect Database
 connectDB();
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 
+// Root Route
 app.get("/", (req, res) => {
-  res.send("✅ Backend Working Perfectly");
+  res.send("✅ Backend Working Perfectly on Render");
 });
 
+// Server Start
 const PORT = process.env.PORT || 9007;
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+

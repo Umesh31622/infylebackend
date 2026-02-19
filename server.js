@@ -32,7 +32,6 @@
 // app.listen(PORT, () => {
 //   console.log(`🚀 Server running on port ${PORT}`);
 // });
-
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -52,26 +51,18 @@ const allowedOrigins = [
   "https://admintest.infyle.in",
 ];
 
-// ✅ CORS Fix for Render + Preflight
+// ✅ CORS Middleware
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("❌ CORS Not Allowed"));
-      }
-    },
+    origin: allowedOrigins,
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   })
 );
 
-// ✅ Preflight Fix (MOST IMPORTANT)
-app.options("*", cors());
+// ✅ Preflight Fix (Node 22 + Express Safe)
+app.options("/*", cors());
 
 // Middleware
 app.use(express.json());
@@ -90,8 +81,6 @@ app.get("/", (req, res) => {
 
 // Start Server
 const PORT = process.env.PORT || 9007;
-
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
